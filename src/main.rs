@@ -4,6 +4,7 @@ mod dtos;
 mod error;
 mod models;
 mod utils;
+mod middleware;
 
 use axum::{
     http::{
