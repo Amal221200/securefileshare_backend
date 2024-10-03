@@ -3,6 +3,7 @@ mod db;
 mod dtos;
 mod error;
 mod models;
+mod utils;
 
 use axum::{
     http::{
