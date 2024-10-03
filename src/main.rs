@@ -6,6 +6,7 @@ mod models;
 mod utils;
 mod middleware;
 mod handler;
+mod router;
 
 use axum::{
     http::{
