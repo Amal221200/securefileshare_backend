@@ -5,6 +5,7 @@ mod error;
 mod models;
 mod utils;
 mod middleware;
+mod handler;
 
 use axum::{
     http::{
