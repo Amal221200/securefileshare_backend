@@ -2,16 +2,10 @@ use crate::{
     db::UserExt,
     dtos::{LoginUserDto, RegisterUserDto, Response, UserLoginResponseDto},
     error::{ErrorMessage, HttpError},
-    utils::{keys::generate_key, password, token},
+    utils::{cookie::handle_cookie, keys::generate_key, password, token},
     AppState,
 };
-use axum::{
-    http::{header, HeaderMap, StatusCode},
-    response::IntoResponse,
-    routing::post,
-    Extension, Json, Router,
-};
-use axum_extra::extract::cookie::Cookie;
+use axum::{http::StatusCode, response::IntoResponse, routing::post, Extension, Json, Router};
 use std::sync::Arc;
 use validator::Validate;
 
@@ -93,25 +87,12 @@ pub async fn login(
     )
     .map_err(|e| HttpError::server_error(e.to_string()))?;
 
-    let cookie_duration = time::Duration::minutes(app_state.env.jwt_max_age);
-
-    let cookie = Cookie::build(("token", token.clone()))
-        .path("/")
-        .max_age(cookie_duration)
-        .http_only(true)
-        .build();
-
     let response = Json(UserLoginResponseDto {
-        token,
+        token: token.clone(),
         status: "success".to_string(),
     });
 
-    let mut headers = HeaderMap::new();
-
-    headers.append(header::SET_COOKIE, cookie.to_string().parse().unwrap());
-
-    let mut response = response.into_response();
-    response.headers_mut().extend(headers);
+    let response = handle_cookie(token, app_state.env.jwt_max_age, response.into_response());
 
     Ok(response)
 }

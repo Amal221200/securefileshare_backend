@@ -267,3 +267,9 @@ pub struct RetrieveFileDto {
     )]
     pub password: String,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct ResponseDto {
+    pub status: &'static str,
+    pub message: String,
+}

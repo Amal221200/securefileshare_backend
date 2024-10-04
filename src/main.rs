@@ -2,22 +2,22 @@ mod config;
 mod db;
 mod dtos;
 mod error;
-mod models;
-mod utils;
-mod middleware;
 mod handler;
+mod middleware;
+mod models;
 mod router;
+mod utils;
 
-use axum::{
-    http::{
-        header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
-        HeaderValue, Method,
-    },
-    Router,
+use std::sync::Arc;
+
+use axum::http::{
+    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
+    HeaderValue, Method,
 };
 use config::Config;
 use db::{DBClient, UserExt};
 use dotenv::dotenv;
+use router::create_router;
 use sqlx::postgres::PgPoolOptions;
 use tokio_cron_scheduler::{Job, JobScheduler};
 use tower_http::cors::CorsLayer;
@@ -84,7 +84,7 @@ async fn main() {
         sched.start().await.unwrap();
     });
 
-    let app = Router::new().layer(cors.clone());
+    let app = create_router(Arc::new(app_state.clone())).layer(cors.clone());
 
     println!("Server is running on  http://localhost:{}", config.port);
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", config.port))
